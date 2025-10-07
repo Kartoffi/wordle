@@ -1,8 +1,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  height: 100%;
 }
 
 .logo {
@@ -34,7 +33,13 @@
 }
 
 h1 {
-  font-size: 3rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
 }
 
 .grid {
@@ -59,6 +64,15 @@ h1 {
   height: 50px;
 }
 
+.example {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+  text-align: start;
+  width: 100%;
+}
+
 .false {
   background-color: #787c7e;
 }
@@ -76,26 +90,38 @@ h1 {
   background-color: #d3d6da;
 }
 
+.inactive {
+  background-color: #787c7e;
+  color: white;
+}
+
+.help-window {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 @media (min-width: 600px) {
   .letter-container {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     font-size: 2rem;
   }
 
   h1 {
-    font-size: 4rem;
+    font-size: 3rem;
+    margin-bottom: 30px;
   }
 }
 
 @media (min-width: 900px) {
   .letter-container {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     font-size: 2.5rem;
   }
 
   h1 {
-    font-size: 5rem;
+    font-size: 4rem;
   }
 }

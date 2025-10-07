@@ -26,10 +26,11 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  height: 100%;
+}
+
+html {
+  height: 100%;
 }
 
 h1 {
@@ -37,22 +38,33 @@ h1 {
   line-height: 1.1;
 }
 
-button {
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 5px;
+}
+
+.key {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  padding: 10px;
+  font-size: 0.8em;
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
+.key:hover {
   border-color: #646cff;
 }
-button:focus,
-button:focus-visible {
+.key:focus,
+.key:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
@@ -64,7 +76,7 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
-  button {
+  .key {
     background-color: #f9f9f9;
   }
 }
