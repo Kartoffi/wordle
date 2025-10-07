@@ -4,68 +4,25 @@ import Help from './components/Help'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-type Cell = { letter: string; status: 'pending' | 'correct' | 'misplaced' | 'false' };
-type GameState = Cell[][];
-
-const baseGame: GameState = [
-  [
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' }
-  ],
-  [
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' }
-  ],
-  [
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' }
-  ],
-  [
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' }
-  ],
-  [
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' }
-  ],
-  [
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' },
-    { letter: '', status: 'pending' }
-  ]
-];
-
-
-const initialGame: GameState = baseGame.map(row => row.map(cell => ({ ...cell })));
-
 function App() {
-  const [lettersNotInWord, setLettersNotInWord] = useState<string[]>([]);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [guesses, setGuesses] = useState<string[]>([]);
+  const [showAlert, setShowAlert] = useState(false);
+
+  useEffect(() => {
+    if (showAlert) {
+      const timer = setTimeout(() => {
+        setShowAlert(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showAlert]);
 
   const fetchWord = async () => {
     try {
-      const response = await axios.get('https://random-word-api.herokuapp.com/word?length=5&lang=en');
+      const response = await axios.get('https://random-word-api.vercel.app/api?words=1&length=5&type=uppercase');
       return response.data[0].toUpperCase();
     } catch (error) {
       console.error('Error fetching word:', error);
-      setErrorMessage('Error fetching word');
       return 'ERROR';
     }
   }
@@ -78,80 +35,52 @@ function App() {
     }
     getWord();
   }, []);
-  const [gameState, setGameState] = useState(initialGame);
-  const [currentWord, setCurrentWord] = useState('');
+
+  const [currentGuess, setCurrentGuess] = useState('');
   const [tries, setTries] = useState(0);
   const [wordConfirmed, setWordConfirmed] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     if (wordConfirmed) {
-      if (currentWord.toUpperCase() === solution) {
-        alert('Congratulations! You guessed the word!');
+      if (currentGuess.toUpperCase() === solution) {
+        setGuesses(prev => [...prev, currentGuess.toUpperCase()]);
+        setWordConfirmed(false);
         setTries(6);
+        return;
       }
-
-      if (currentWord.toUpperCase() !== solution && tries === 6) {
-        alert(`Game Over! The word was ${solution}.`);
+      
+      if (currentGuess.toUpperCase() !== solution && tries === 6) {
+        setGuesses(prev => [...prev, currentGuess.toUpperCase()]);
+        setWordConfirmed(false);
+        return;
       }
-
-      if (currentWord.toUpperCase() !== solution && tries < 6) {
-        setGameState(prevGameState => {
-          const newGameState = prevGameState.map((row, idx) => {
-            if (idx === tries) {
-              return row.map((cell, index) => {
-                const letter = currentWord[index] || '';
-                let status: Cell['status'] = 'false';
-
-                // WIP: implement logic where a letter is in the word but was already guessed and there are no more instances of that letter in the solution
-                if (solution.includes(letter))
-
-                // WIP: implement logic where a letter is in the word but was also already guessed but there is still one or more instances of that letter in the solution which where also not guessed yet
-
-                if (!solution.includes(letter)) {
-                  setLettersNotInWord(prev => {
-                    if (!prev.includes(letter) && letter !== '') {
-                      return [...prev, letter];
-                    }
-                    return prev;
-                  });
-                }
-
-                if (letter === solution[index]) {
-                  status = 'correct';
-                } else if (solution.includes(letter)) {
-                  status = 'misplaced';
-                }
-
-                return { letter, status };
-              });
-            } else {
-              return row;
-            }
-          });
-          return newGameState;
-        });
-      }
-
+      setGuesses(prev => [...prev, currentGuess.toUpperCase()]);
       setWordConfirmed(false);
       setTries(prev => prev + 1);
-      setCurrentWord('');
+      setCurrentGuess('');
     }
   }, [wordConfirmed]);
 
-  useEffect(() => {
-    setGameState(prevGameState => {
-      const newGameState = prevGameState.map((row, idx) =>
-        idx === tries
-          ? row.map((cell, index) => ({
-              letter: currentWord[index] || '',
-              status: 'pending' as Cell['status'],
-            }))
-          : row
-      );
-      return newGameState;
+  function getLetterStatus(word: string, solution: string) {
+    return word.split('').map((letter, idx) => {
+      if (solution[idx] === letter) {
+        return 'correct';
+      } else if (solution.includes(letter)) {
+        return 'misplaced';
+      } else {
+        return 'false';
+      }
     });
-  }, [currentWord]);
+  }
+
+  async function startNewGame() {
+    setGuesses([]);
+    setCurrentGuess('');
+    setTries(0);
+    setWordConfirmed(false);
+    setSolution(await fetchWord());
+  }
 
   return (
     <>
@@ -163,18 +92,65 @@ function App() {
           </button>
         </div>
         <div className="grid">
-          {gameState.map((word, wordIndex) => (
-            <div key={wordIndex} className="word">
-              {word.map((letterObj, letterIndex) => (
-                <div className={`letter-container ${letterObj.status}`} key={letterIndex}>
-                  <div className={`letter ${letterObj.status}`}>{letterObj.letter}</div>
-                </div>
-              ))}
-            </div>
-          ))}
+          {
+            Array.from({ length: 6 }).map((_, i) => {
+              if (i === tries) {
+                return (
+                  <div key={i} className="word">
+                    {currentGuess.split('').map((letter, idx) => (
+                      <div className="letter-container pending" key={idx}>
+                        <div className="letter pending">{letter}</div>
+                      </div>
+                    ))}
+                    {Array.from({ length: 5 - currentGuess.length }).map((_, idx) => (
+                      <div className="letter-container pending" key={idx + currentGuess.length}>
+                        <div className="letter pending"></div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              } else if (i < guesses.length) {
+                const letterStatuses = getLetterStatus(guesses[i], solution);
+                return (
+                  <div key={i} className="word">
+                    {guesses[i].split('').map((letter, idx) => (
+                      <div className={`letter-container ${letterStatuses[idx]}`} key={idx}>
+                        <div className={`letter ${letterStatuses[idx]}`}>{letter}</div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              } else {
+                // Render empty row for unused guesses
+                return (
+                  <div key={i} className="word">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <div className="letter-container pending" key={idx}>
+                        <div className="letter pending"></div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+            })
+          }
+        </div>
+        <div className={`alert ${showAlert ? 'alert-show' : ''}`}>
+          Not a valid word. Please try again.
         </div>
         {tries < 6 && (
-          <Keyboard currentWord={currentWord} setCurrentWord={setCurrentWord} setWordConfirmed={setWordConfirmed} lettersNotInWord={lettersNotInWord} />
+          <Keyboard currentGuess={currentGuess} setCurrentGuess={setCurrentGuess} setWordConfirmed={setWordConfirmed} setShowAlert={setShowAlert}/>
+        )}
+        {tries === 6 && (
+          <>
+            {currentGuess.toUpperCase() !== solution && (
+              <p><b>Game Over!</b> The word was <b>{solution.toLowerCase()}.</b></p>
+            )}
+            {currentGuess.toUpperCase() === solution && (
+              <p><b>Congratulations!</b> You guessed the word!</p>
+            )}
+            <button onClick={startNewGame}>NEW GAME</button>
+          </>
         )}
       </div>
       {showHelp && (

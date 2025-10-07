@@ -101,6 +101,28 @@ h1 {
   align-items: center;
 }
 
+.alert {
+  width: 90%;
+  height: 40px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+  border-radius: 50px;
+  max-width: 400px;
+  background-color: rgba(219, 98, 98, 0);
+  color: rgba(255, 255, 255, 0);
+  transition: background-color 0.5s, color 0.5s;
+  user-select: none;
+}
+
+.alert-show {
+  background-color: rgb(219, 98, 98);
+  color: white;
+}
+
 @media (min-width: 600px) {
   .letter-container {
     width: 60px;
