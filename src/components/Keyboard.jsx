@@ -40,12 +40,7 @@ const Keyboard = ({ currentGuess, setCurrentGuess, setWordConfirmed, setShowAler
               }
 
               if (key === 'Enter' && currentGuess.length === 5) {
-                console.log("Checking word:", await checkForValidWord(currentGuess));
-                if (await checkForValidWord(currentGuess)) {
-                  setWordConfirmed(true);
-                } else {
-                  setShowAlert(true);
-                }
+                setWordConfirmed(true);
               }
 
               if (key !== 'Back' && key !== 'Enter' && currentGuess.length < 5) {

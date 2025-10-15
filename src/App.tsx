@@ -7,6 +7,7 @@ import axios from 'axios'
 function App() {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [showAlert, setShowAlert] = useState(false);
+  const [possibleWords, setPossibleWords] = useState<string[]>([]);
 
   useEffect(() => {
     if (showAlert) {
@@ -17,24 +18,27 @@ function App() {
     }
   }, [showAlert]);
 
-  const fetchWord = async () => {
-    try {
-      const response = await axios.get('https://random-word-api.vercel.app/api?words=1&length=5&type=uppercase');
-      return response.data[0].toUpperCase();
-    } catch (error) {
-      console.error('Error fetching word:', error);
-      return 'ERROR';
+  useEffect(() => {
+    async function loadWords() {
+      const response = await fetch('/words.txt');
+      const text = await response.text();
+      const words = text
+        .split(/\r?\n/)
+        .map(word => word.trim().toUpperCase())
+        .filter(word => word.length === 5)
+        .filter(Boolean);
+      setPossibleWords(words);
     }
-  }
+    loadWords();
+  }, []);
 
   const [solution, setSolution] = useState('ERROR');
+
   useEffect(() => {
-    const getWord = async () => {
-      const word = await fetchWord();
-      setSolution(word);
+    if (possibleWords.length > 0) {
+      setSolution(possibleWords[Math.floor(Math.random() * possibleWords.length)]);
     }
-    getWord();
-  }, []);
+  }, [possibleWords]);
 
   const [currentGuess, setCurrentGuess] = useState('');
   const [tries, setTries] = useState(0);
@@ -79,7 +83,7 @@ function App() {
     setCurrentGuess('');
     setTries(0);
     setWordConfirmed(false);
-    setSolution(await fetchWord());
+    setSolution(possibleWords[Math.floor(Math.random() * possibleWords.length)]);
   }
 
   return (
