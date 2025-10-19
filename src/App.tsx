@@ -1,13 +1,119 @@
 import './App.css'
 import Keyboard from './components/Keyboard'
 import Help from './components/Help'
+import Grid from './components/Grid'
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 
 function App() {
-  const [guesses, setGuesses] = useState<string[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [possibleWords, setPossibleWords] = useState<string[]>([]);
+
+  const [gridTemplate, setGridTemplate] = useState(
+    [
+      [
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        }
+      ],
+      [
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        }
+      ],
+      [
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        }
+      ],
+      [
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        }
+      ],
+      [
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        }
+      ],
+      [
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        },
+        {
+          letter: '', status: 'pending'
+        }
+      ],
+    ],
+  );
 
   useEffect(() => {
     if (showAlert) {
@@ -48,18 +154,42 @@ function App() {
   useEffect(() => {
     if (wordConfirmed) {
       if (currentGuess.toUpperCase() === solution) {
-        setGuesses(prev => [...prev, currentGuess.toUpperCase()]);
+        setGridTemplate(prev => {
+            const newGrid = [...prev];
+            newGrid[tries] = getLetterStatus(currentGuess.toUpperCase(), solution).map((status, idx) => ({
+              letter: currentGuess.toUpperCase()[idx],
+              status: status
+            }));
+            return newGrid;
+          }
+        );
         setWordConfirmed(false);
         setTries(6);
         return;
       }
       
       if (currentGuess.toUpperCase() !== solution && tries === 6) {
-        setGuesses(prev => [...prev, currentGuess.toUpperCase()]);
+        setGridTemplate(prev => {
+            const newGrid = [...prev];
+            newGrid[tries - 1] = getLetterStatus(currentGuess.toUpperCase(), solution).map((status, idx) => ({
+              letter: currentGuess.toUpperCase()[idx],
+              status: status
+            }));
+            return newGrid;
+          }
+        );
         setWordConfirmed(false);
         return;
       }
-      setGuesses(prev => [...prev, currentGuess.toUpperCase()]);
+      setGridTemplate(prev => {
+          const newGrid = [...prev];
+          newGrid[tries] = getLetterStatus(currentGuess.toUpperCase(), solution).map((status, idx) => ({
+            letter: currentGuess.toUpperCase()[idx],
+            status: status
+          }));
+          return newGrid;
+        }
+      );
       setWordConfirmed(false);
       setTries(prev => prev + 1);
       setCurrentGuess('');
@@ -78,13 +208,136 @@ function App() {
     });
   }
 
-  async function startNewGame() {
-    setGuesses([]);
+  function startNewGame() {
+    setGridTemplate(
+      [
+        [
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          }
+        ],
+        [
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          }
+        ],
+        [
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          }
+        ],
+        [
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          }
+        ],
+        [
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          }
+        ],
+        [
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          },
+          {
+            letter: '', status: 'pending'
+          }
+        ],
+      ],
+    );
     setCurrentGuess('');
     setTries(0);
     setWordConfirmed(false);
     setSolution(possibleWords[Math.floor(Math.random() * possibleWords.length)]);
   }
+
+  useEffect(() => {
+    setGridTemplate(prev => {
+        const newGrid = [...prev];
+        newGrid[tries] = currentGuess.split('').map((letter, idx) => ({
+          letter: letter.toUpperCase(),
+          status: 'pending'
+        }));
+        
+        for (let i = currentGuess.length; i < 5; i++) {
+          newGrid[tries][i] = { letter: '', status: 'pending' };
+        }
+        return newGrid;
+      }
+    );
+  }, [currentGuess]);
+
+  console.log(gridTemplate[0][0]);
 
   return (
     <>
@@ -95,50 +348,7 @@ function App() {
             ?
           </button>
         </div>
-        <div className="grid">
-          {
-            Array.from({ length: 6 }).map((_, i) => {
-              if (i === tries) {
-                return (
-                  <div key={i} className="word">
-                    {currentGuess.split('').map((letter, idx) => (
-                      <div className="letter-container pending" key={idx}>
-                        <div className="letter pending">{letter}</div>
-                      </div>
-                    ))}
-                    {Array.from({ length: 5 - currentGuess.length }).map((_, idx) => (
-                      <div className="letter-container pending" key={idx + currentGuess.length}>
-                        <div className="letter pending"></div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              } else if (i < guesses.length) {
-                const letterStatuses = getLetterStatus(guesses[i], solution);
-                return (
-                  <div key={i} className="word">
-                    {guesses[i].split('').map((letter, idx) => (
-                      <div className={`letter-container ${letterStatuses[idx]}`} key={idx}>
-                        <div className={`letter ${letterStatuses[idx]}`}>{letter}</div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              } else {
-                // Render empty row for unused guesses
-                return (
-                  <div key={i} className="word">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                      <div className="letter-container pending" key={idx}>
-                        <div className="letter pending"></div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              }
-            })
-          }
-        </div>
+        <Grid grid={gridTemplate} />
         <div className={`alert ${showAlert ? 'alert-show' : ''}`}>
           Not a valid word. Please try again.
         </div>
