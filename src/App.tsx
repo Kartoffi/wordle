@@ -5,41 +5,60 @@ import Grid from './components/Grid'
 import { useState, useEffect } from 'react'
 
 function App() {
-  const [showAlert, setShowAlert] = useState(false);
   const [possibleWords, setPossibleWords] = useState<string[]>([]);
 
   const [gridTemplate, setGridTemplate] = useState(getEmptyGrid());
 
   useEffect(() => {
-    if (showAlert) {
-      const timer = setTimeout(() => {
-        setShowAlert(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [showAlert]);
-
-  useEffect(() => {
-    async function loadWords() {
-      const response = await fetch('/words.txt');
-      const text = await response.text();
-      const words = text
-        .split(/\r?\n/)
-        .map(word => word.trim().toUpperCase())
-        .filter(word => word.length === 5)
-        .filter(Boolean);
-      setPossibleWords(words);
-    }
-    loadWords();
+    fetch('/words.txt')
+      .then(res => res.text())
+      .then(text => {
+        const words = text
+          .split(/\r?\n/)
+          .map(w => w.trim().toUpperCase())
+          .filter(w => w.length === 5);
+        setPossibleWords(words);
+      });
   }, []);
+
 
   const [solution, setSolution] = useState('ERROR');
 
+  function getLettersWithPositions(word: string) {
+    const wordArray = word.split('');
+    const amountOfAppearancesInWord: { letter: string; positions: number[] }[] = [];
+
+    wordArray.forEach(letter => {
+      const positions = [];
+
+      for (let i = 0; i < word.length; i++) {
+        if (word[i] === letter) {
+          positions.push(i);
+        }
+      }
+
+      if (! amountOfAppearancesInWord.find(item => item.letter === letter)) {
+        amountOfAppearancesInWord.push({
+          letter,
+          positions,
+        });
+      }
+    });
+
+    return amountOfAppearancesInWord;
+  }
+
+  
   useEffect(() => {
     if (possibleWords.length > 0) {
       setSolution(possibleWords[Math.floor(Math.random() * possibleWords.length)]);
     }
   }, [possibleWords]);
+  const [amountOfAppearancesInWord, setAmountOfAppearancesInWord] = useState(getLettersWithPositions('ERROR'));
+
+  useEffect(() => {
+    setAmountOfAppearancesInWord(getLettersWithPositions(solution));
+  }, [solution]);
 
   const [currentGuess, setCurrentGuess] = useState('');
   const [tries, setTries] = useState(0);
@@ -91,15 +110,57 @@ function App() {
     }
   }, [wordConfirmed]);
 
-  function getLetterStatus(word: string, solution: string) {
-    return word.split('').map((letter, idx) => {
-      if (solution[idx] === letter) {
-        return 'correct';
-      } else if (solution.includes(letter)) {
-        return 'misplaced';
-      } else {
-        return 'false';
+  function letterIsContainedInWord(letter: string, word: { letter: string; positions: number[] }[]) {
+    if (word.find(l => l.letter === letter)) {
+        return true;
+    }
+
+    return false;
+  }
+
+  function letterIsInCorrectSpot(letter: string, spot: number, solution: { letter: string; positions: number[] }) {
+      if (letter !== solution?.letter) {
+          return false;
       }
+
+      if (! solution.positions.includes(spot)) {
+          return false;
+      }
+
+      return true;
+  }
+
+  function allOfLetterPositionsGuessed(word: { letter: string; positions: number[] }, solution: { letter: string; positions: number[] }) {
+      if (word.letter !== solution.letter) {
+          return false;
+      }
+
+      if(solution.positions.every(pos => word.positions.includes(pos))) {
+          return true;
+      }
+
+      return false;
+  }
+
+  function getLetterStatus(word: string, solution: string) {
+    const wordObject = getLettersWithPositions(word);
+    const solutionObject = getLettersWithPositions(solution);
+
+    return word.split('').map((letter, idx) => {
+      const letterInWord = wordObject.find(l => l.letter === letter);
+      const letterInSolution = solutionObject.find(l => l.letter === letter);
+      if (letterIsInCorrectSpot(letter, idx, letterInSolution!)) {
+          return 'correct';
+      }
+      if (letterIsContainedInWord(letter, solutionObject)) {
+          if (allOfLetterPositionsGuessed(letterInWord!, letterInSolution!)) {
+              return 'false';
+          } else {
+              return 'misplaced';
+          }
+      }
+      
+      return 'false';
     });
   }
 
@@ -133,8 +194,6 @@ function App() {
     );
   }, [currentGuess]);
 
-  console.log(gridTemplate[0][0]);
-
   return (
     <>
       <div className="game-container h-[100%] display-flex flex-col justify-between items-center p-4">
@@ -145,11 +204,8 @@ function App() {
           </button>
         </div>
         <Grid grid={gridTemplate} />
-        <div className={`alert ${showAlert ? 'alert-show' : ''}`}>
-          Not a valid word. Please try again.
-        </div>
         {tries < 6 && (
-          <Keyboard currentGuess={currentGuess} setCurrentGuess={setCurrentGuess} setWordConfirmed={setWordConfirmed} setShowAlert={setShowAlert}/>
+          <Keyboard currentGuess={currentGuess} setCurrentGuess={setCurrentGuess} setWordConfirmed={setWordConfirmed}/>
         )}
         {tries === 6 && (
           <>
