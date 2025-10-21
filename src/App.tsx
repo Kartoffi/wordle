@@ -10,7 +10,7 @@ function App() {
   const [gridTemplate, setGridTemplate] = useState(getEmptyGrid());
 
   useEffect(() => {
-    fetch('/words.txt')
+    fetch('/words_en.txt')
       .then(res => res.text())
       .then(text => {
         const words = text
@@ -196,10 +196,10 @@ function App() {
 
   return (
     <>
-      <div className="game-container h-[100%] display-flex flex-col justify-between items-center p-4">
-        <div className="header h-[50px] flex justify-between items-center w-[100%] mb-4">
+      <div className="game-container">
+        <div className="header">
           <h1>Wordle</h1>
-          <button className='help-button rounded-[50%] w-[40px] h-[40px] bg-gray-500 text-white text-[1.25em] hover:bg-white hover:text-black cursor-pointer' onClick={() => setShowHelp(prev => !prev)}>
+          <button className='help-button' onClick={() => setShowHelp(prev => !prev)}>
             ?
           </button>
         </div>

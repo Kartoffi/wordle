@@ -1,0 +1,46 @@
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 5px;
+}
+
+.key {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 10px;
+  font-size: 0.6em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.key:hover {
+  border-color: #646cff;
+}
+
+.key:focus,
+.key:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (min-width: 500px) {
+  .key {
+    padding: 14px;
+    font-size: 0.9em;
+  }
+}
+
+@media (min-width: 900px) {
+  .key {
+    padding: 16px;
+    font-size: 1em;
+  }
+}
